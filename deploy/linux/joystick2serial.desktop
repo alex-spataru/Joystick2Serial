@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Joystick2Serial
+Comment=
+Exec= joystick2serial
+Terminal=false
+Type=Application
+StartupNotify=true
+Categories=Electronics;Engineering;Science;
+Icon=joystick2serial
+X-AppImage-Name=Joystick2Serial
+X-AppImage-Version=1.0.0
+X-AppImage-Arch=x86_64
