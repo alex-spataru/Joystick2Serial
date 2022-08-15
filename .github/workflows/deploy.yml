@@ -63,7 +63,7 @@ jobs:
     - name: '⚙️ Install dependencies'
       run: |
         sudo apt-get update
-        sudo apt-get install libgl1-mesa-dev libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libzstd-dev
+        sudo apt-get install libgl1-mesa-dev libsdl2-dev libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-render-util0 libxcb-xinerama0 libzstd-dev
 
     - name: '🚧 Compile application'
       run: |
@@ -78,7 +78,7 @@ jobs:
     - name: '📦 Create AppImage'
       run: |
           make INSTALL_ROOT=appdir install
-          ./linuxdeployqt appdir/usr/share/applications/*.desktop -appimage -bundle-non-qt-libs"
+          ./linuxdeployqt appdir/usr/share/applications/*.desktop -appimage -bundle-non-qt-libs -extra-plugins=imageformats/libqsvg.so"
           # Rename AppImage to match "%AppName%-%Version%-Linux.AppImage" format
           mv ${{env.EXECUTABLE}}-${{env.VERSION}}-x86_64.AppImage ${{env.EXECUTABLE}}-${{env.VERSION}}-Linux.AppImage
           
