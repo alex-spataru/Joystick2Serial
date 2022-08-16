@@ -29,9 +29,9 @@
 #include "Utilities.h"
 #include "QJoysticks.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    m_ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , m_ui(new Ui::MainWindow)
 {
     m_spd1 = 0;
     m_spd2 = 0;
@@ -50,17 +50,26 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->buttonsContainer->setLayout(m_buttonsLayout);
 
     connect(&Serial::instance(), &Serial::dataSent, this, &MainWindow::onSerialDataSent);
-    connect(&Serial::instance(), &Serial::dataReceived, this, &MainWindow::onSerialDataReceived);
-    connect(&Serial::instance(), &Serial::availablePortsChanged, this, &MainWindow::refreshSerial);
+    connect(&Serial::instance(), &Serial::dataReceived, this,
+            &MainWindow::onSerialDataReceived);
+    connect(&Serial::instance(), &Serial::availablePortsChanged, this,
+            &MainWindow::refreshSerial);
 
-    connect(QJoysticks::getInstance(), &QJoysticks::axisChanged, this, &MainWindow::onAxisChanged);
-    connect(QJoysticks::getInstance(), &QJoysticks::buttonChanged, this, &MainWindow::onButtonChanged);
-    connect(QJoysticks::getInstance(), &QJoysticks::countChanged, this, &MainWindow::refreshJoysticks);
+    connect(QJoysticks::getInstance(), &QJoysticks::axisChanged, this,
+            &MainWindow::onAxisChanged);
+    connect(QJoysticks::getInstance(), &QJoysticks::buttonChanged, this,
+            &MainWindow::onButtonChanged);
+    connect(QJoysticks::getInstance(), &QJoysticks::countChanged, this,
+            &MainWindow::refreshJoysticks);
 
-    connect(m_ui->connectButton, &QCheckBox::clicked, this, &MainWindow::onConnectButtonChanged);
-    connect(m_ui->baudRates, SIGNAL(currentIndexChanged(int)), this, SLOT(onBaudRateIndexChanged(int)));
-    connect(m_ui->serialDevices, SIGNAL(currentIndexChanged(int)), this, SLOT(onDeviceIndexChanged(int)));
-    connect(m_ui->joystickList, SIGNAL(currentIndexChanged(int)), this, SLOT(onJoystickIndexChanged(int)));
+    connect(m_ui->connectButton, &QCheckBox::clicked, this,
+            &MainWindow::onConnectButtonChanged);
+    connect(m_ui->baudRates, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(onBaudRateIndexChanged(int)));
+    connect(m_ui->serialDevices, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(onDeviceIndexChanged(int)));
+    connect(m_ui->joystickList, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(onJoystickIndexChanged(int)));
 
     m_ui->baudRates->clear();
     m_ui->baudRates->addItems(Serial::instance().baudRateList());
@@ -75,18 +84,20 @@ MainWindow::~MainWindow()
     delete m_ui;
 }
 
-void MainWindow::sendData() {
+void MainWindow::sendData()
+{
     const int js = m_ui->joystickList->currentIndex();
 
-    if (QJoysticks::getInstance()->joystickExists(js)) {
+    if (QJoysticks::getInstance()->joystickExists(js))
+    {
         const int spd1 = m_spd1 * 20;
         const int spd2 = m_spd2 * 20;
         m_stp2 = fmax(0, m_stp2);
         m_stp2 = fmin(3200, m_stp2);
-        const auto data = QString("%1,%2,%3,%4\n").arg(QString::number((int) spd1),
-                                                       QString::number((int) spd2),
-                                                       QString::number((int) m_stp1),
-                                                       QString::number((int) m_stp2));
+        const auto data
+            = QString("%1,%2,%3,%4\n")
+                  .arg(QString::number((int)spd1), QString::number((int)spd2),
+                       QString::number((int)m_stp1), QString::number((int)m_stp2));
 
         Serial::instance().write(data.toUtf8());
     }
@@ -105,29 +116,34 @@ void MainWindow::refreshSerial()
         m_ui->serialDevices->setCurrentIndex(0);
 }
 
-void MainWindow::refreshJoysticks() {
+void MainWindow::refreshJoysticks()
+{
     m_ui->joystickList->clear();
     m_ui->joystickList->addItems(QJoysticks::getInstance()->deviceNames());
     m_ui->joystickList->setCurrentIndex(0);
 }
 
-void MainWindow::onConnectButtonChanged() {
+void MainWindow::onConnectButtonChanged()
+{
     if (Serial::instance().isOpen())
         disconnectSerial();
     else
         connectSerial();
 }
 
-void MainWindow::onJoystickIndexChanged(int index) {
+void MainWindow::onJoystickIndexChanged(int index)
+{
     if (!QJoysticks::getInstance()->joystickExists(index))
         return;
 
-    for (int i = 0; i < m_axes.count(); ++i) {
+    for (int i = 0; i < m_axes.count(); ++i)
+    {
         m_axisLayout->removeWidget(m_axes.at(i));
         m_axes.at(i)->deleteLater();
     }
 
-    for (int i = 0; i < m_buttons.count(); ++i) {
+    for (int i = 0; i < m_buttons.count(); ++i)
+    {
         m_buttonsLayout->removeWidget(m_buttons.at(i));
         m_buttons.at(i)->deleteLater();
     }
@@ -135,7 +151,8 @@ void MainWindow::onJoystickIndexChanged(int index) {
     m_axes.clear();
     m_buttons.clear();
 
-    for (int i = 0; i < QJoysticks::getInstance()->getNumAxes(index); ++i) {
+    for (int i = 0; i < QJoysticks::getInstance()->getNumAxes(index); ++i)
+    {
         auto progress = new QProgressBar(this);
         progress->setMinimumHeight(12);
         progress->setMinimum(-100);
@@ -147,7 +164,8 @@ void MainWindow::onJoystickIndexChanged(int index) {
 
     int row = 0;
     int column = 0;
-    for (int i = 0; i < QJoysticks::getInstance()->getNumButtons(index); ++i) {
+    for (int i = 0; i < QJoysticks::getInstance()->getNumButtons(index); ++i)
+    {
         auto button = new QCheckBox(this);
         button->setText(tr("Butón %1").arg(i + 1));
         button->setAttribute(Qt::WA_TransparentForMouseEvents);
@@ -157,65 +175,82 @@ void MainWindow::onJoystickIndexChanged(int index) {
         m_buttons.append(button);
 
         ++column;
-        if (column > 2) {
+        if (column > 2)
+        {
             column = 0;
             ++row;
         }
     }
 }
 
-void MainWindow::connectSerial() {
-    if (!Serial::instance().open(QFile::ReadWrite)) {
-        Utilities::showMessageBox("Error al abrir el puerto serial",
-                                  "Favor de checar si el puerto no esta siendo utilizado por otro programa");
+void MainWindow::connectSerial()
+{
+    if (!Serial::instance().open(QFile::ReadWrite))
+    {
+        Utilities::showMessageBox(
+            "Error al abrir el puerto serial",
+            "Favor de checar si el puerto no esta siendo utilizado por otro programa");
     }
 
-    else {
+    else
+    {
         m_ui->connectButton->setChecked(true);
         m_ui->connectButton->setText("Desconectar");
     }
 }
 
-void MainWindow::disconnectSerial() {
+void MainWindow::disconnectSerial()
+{
     Serial::instance().close();
     m_ui->connectButton->setChecked(false);
     m_ui->connectButton->setText("Conectar");
 }
 
-void MainWindow::onDeviceIndexChanged(int index) {
+void MainWindow::onDeviceIndexChanged(int index)
+{
     Serial::instance().setPortIndex(index);
     m_ui->connectButton->setEnabled(Serial::instance().configurationOk());
 }
 
-void MainWindow::onBaudRateIndexChanged(int index) {
+void MainWindow::onBaudRateIndexChanged(int index)
+{
     auto baud = Serial::instance().baudRateList().at(index);
     Serial::instance().setBaudRate(baud.toInt());
 }
 
-void MainWindow::onSerialDataSent(const QByteArray& data) {
-    //m_ui->console->append("<font color='#f88'><strong>TX:</strong> " + QString::fromUtf8(data) + "</font>");
+void MainWindow::onSerialDataSent(const QByteArray &data)
+{
+    // m_ui->console->append("<font color='#f88'><strong>TX:</strong> " +
+    // QString::fromUtf8(data) + "</font>");
 }
 
-void MainWindow::onSerialDataReceived(const QByteArray& data) {
+void MainWindow::onSerialDataReceived(const QByteArray &data)
+{
     auto text = QString::fromUtf8(data).replace("\r\n", "\n");
     m_buffer.append(text);
 
-    while (m_buffer.contains("\n")) {
+    while (m_buffer.contains("\n"))
+    {
         auto currentLine = m_buffer.split("\n").first().replace("\n", "");
-        if (currentLine.isEmpty()) {
+        if (currentLine.isEmpty())
+        {
             m_buffer.remove(0, 1);
             continue;
         }
 
         m_ui->currentLine->setText(currentLine);
-        m_ui->console->append("<font color='#88f'><strong>RX:</strong> " + currentLine + "</font>");
+        m_ui->console->append("<font color='#88f'><strong>RX:</strong> " + currentLine
+                              + "</font>");
         m_buffer.remove(0, currentLine.length() + 1);
     }
 }
 
-void MainWindow::onAxisChanged(const int js, const int axis, const qreal value) {
-    if (js == m_ui->joystickList->currentIndex()) {
-        if (axis < m_axes.count()) {
+void MainWindow::onAxisChanged(const int js, const int axis, const qreal value)
+{
+    if (js == m_ui->joystickList->currentIndex())
+    {
+        if (axis < m_axes.count())
+        {
             m_axes.at(axis)->setValue(value * 100);
 
             if (axis == 5)
@@ -226,12 +261,16 @@ void MainWindow::onAxisChanged(const int js, const int axis, const qreal value) 
     }
 }
 
-void MainWindow::onButtonChanged(const int js, const int button, const bool pressed) {
-    if (js == m_ui->joystickList->currentIndex()) {
-        if (button < m_buttons.count()) {
+void MainWindow::onButtonChanged(const int js, const int button, const bool pressed)
+{
+    if (js == m_ui->joystickList->currentIndex())
+    {
+        if (button < m_buttons.count())
+        {
             m_buttons.at(button)->setChecked(pressed);
 
-            if (pressed) {
+            if (pressed)
+            {
                 if (button == 1)
                     m_stp1 = 0;
                 else if (button == 3)
@@ -246,18 +285,26 @@ void MainWindow::onButtonChanged(const int js, const int button, const bool pres
                 else if (button == 14)
                     m_stp2 -= 360;
 
-                else if (button == 5) {
+                else if (button == 5)
+                {
                     m_spd1 = 1;
                     m_spd2 = 0;
-                } else if (button == 4) {
+                }
+                else if (button == 4)
+                {
                     m_spd1 = 0;
                     m_spd2 = 1;
                 }
-            } else {
-                if (button == 5) {
+            }
+            else
+            {
+                if (button == 5)
+                {
                     m_spd1 = 0;
                     m_spd2 = 0;
-                } else if (button == 4) {
+                }
+                else if (button == 4)
+                {
                     m_spd1 = 0;
                     m_spd2 = 0;
                 }

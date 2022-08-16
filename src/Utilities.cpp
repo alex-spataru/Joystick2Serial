@@ -31,8 +31,8 @@ int Utilities::showMessageBox(QString text, QString informativeText, QString win
                               QMessageBox::StandardButtons bt)
 {
     // Get app icon
-    auto icon = QPixmap(":/icon.svg").scaled(64, 64, Qt::IgnoreAspectRatio,
-                                             Qt::SmoothTransformation);
+    auto icon = QPixmap(":/icon.svg")
+                    .scaled(64, 64, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 
     // Create message box & set options
     QMessageBox box;

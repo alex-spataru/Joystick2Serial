@@ -140,7 +140,8 @@ bool Serial::configurationOk() const
  */
 quint64 Serial::write(const QByteArray &data)
 {
-    if (isWritable()) {
+    if (isWritable())
+    {
         auto bytes = port()->write(data);
         Q_EMIT dataSent(data.chopped(data.length() - bytes));
         return bytes;
@@ -182,8 +183,7 @@ bool Serial::open(const QIODevice::OpenMode mode)
         // Open device
         if (port()->open(mode))
         {
-            connect(port(), &QIODevice::readyRead, this,
-                    &Serial::onReadyRead);
+            connect(port(), &QIODevice::readyRead, this, &Serial::onReadyRead);
             return true;
         }
     }
@@ -453,21 +453,21 @@ void Serial::setParity(const quint8 parityIndex)
     // Set parity based on current index
     switch (parityIndex)
     {
-    case 0:
-        m_parity = QSerialPort::NoParity;
-        break;
-    case 1:
-        m_parity = QSerialPort::EvenParity;
-        break;
-    case 2:
-        m_parity = QSerialPort::OddParity;
-        break;
-    case 3:
-        m_parity = QSerialPort::SpaceParity;
-        break;
-    case 4:
-        m_parity = QSerialPort::MarkParity;
-        break;
+        case 0:
+            m_parity = QSerialPort::NoParity;
+            break;
+        case 1:
+            m_parity = QSerialPort::EvenParity;
+            break;
+        case 2:
+            m_parity = QSerialPort::OddParity;
+            break;
+        case 3:
+            m_parity = QSerialPort::SpaceParity;
+            break;
+        case 4:
+            m_parity = QSerialPort::MarkParity;
+            break;
     }
 
     // Update serial port config.
@@ -508,18 +508,18 @@ void Serial::setDataBits(const quint8 dataBitsIndex)
     // Obtain data bits value from current index
     switch (dataBitsIndex)
     {
-    case 0:
-        m_dataBits = QSerialPort::Data5;
-        break;
-    case 1:
-        m_dataBits = QSerialPort::Data6;
-        break;
-    case 2:
-        m_dataBits = QSerialPort::Data7;
-        break;
-    case 3:
-        m_dataBits = QSerialPort::Data8;
-        break;
+        case 0:
+            m_dataBits = QSerialPort::Data5;
+            break;
+        case 1:
+            m_dataBits = QSerialPort::Data6;
+            break;
+        case 2:
+            m_dataBits = QSerialPort::Data7;
+            break;
+        case 3:
+            m_dataBits = QSerialPort::Data8;
+            break;
     }
 
     // Update serial port configuration
@@ -547,15 +547,15 @@ void Serial::setStopBits(const quint8 stopBitsIndex)
     // Obtain stop bits value from current index
     switch (stopBitsIndex)
     {
-    case 0:
-        m_stopBits = QSerialPort::OneStop;
-        break;
-    case 1:
-        m_stopBits = QSerialPort::OneAndHalfStop;
-        break;
-    case 2:
-        m_stopBits = QSerialPort::TwoStop;
-        break;
+        case 0:
+            m_stopBits = QSerialPort::OneStop;
+            break;
+        case 1:
+            m_stopBits = QSerialPort::OneAndHalfStop;
+            break;
+        case 2:
+            m_stopBits = QSerialPort::TwoStop;
+            break;
     }
 
     // Update serial port configuration
@@ -592,15 +592,15 @@ void Serial::setFlowControl(const quint8 flowControlIndex)
     // Obtain flow control value from current index
     switch (flowControlIndex)
     {
-    case 0:
-        m_flowControl = QSerialPort::NoFlowControl;
-        break;
-    case 1:
-        m_flowControl = QSerialPort::HardwareControl;
-        break;
-    case 2:
-        m_flowControl = QSerialPort::SoftwareControl;
-        break;
+        case 0:
+            m_flowControl = QSerialPort::NoFlowControl;
+            break;
+        case 1:
+            m_flowControl = QSerialPort::HardwareControl;
+            break;
+        case 2:
+            m_flowControl = QSerialPort::SoftwareControl;
+            break;
     }
 
     // Update serial port configuration
@@ -671,7 +671,8 @@ void Serial::refreshSerialDevices()
  */
 void Serial::handleError(QSerialPort::SerialPortError error)
 {
-    if (error != QSerialPort::NoError) {
+    if (error != QSerialPort::NoError)
+    {
         qDebug() << error;
         disconnectDevice();
     }
@@ -693,19 +694,20 @@ void Serial::readSettings()
 {
     // Register standard baud rates
     QStringList stdBaudRates
-            = { "300",   "1200",   "2400",   "4800",   "9600",   "19200",   "38400",  "57600",
-                "74880", "115200", "230400", "250000", "500000", "1000000", "2000000" };
+        = { "300",   "1200",   "2400",   "4800",   "9600",   "19200",   "38400",  "57600",
+            "74880", "115200", "230400", "250000", "500000", "1000000", "2000000" };
 
     // Get value from settings
     QStringList list;
-    list = m_settings.value("IO_DataSource_Serial__BaudRates", stdBaudRates).toStringList();
+    list = m_settings.value("IO_DataSource_Serial__BaudRates", stdBaudRates)
+               .toStringList();
 
     // Convert QStringList to QVector
     m_baudRateList.clear();
     for (int i = 0; i < list.count(); ++i)
         m_baudRateList.append(list.at(i));
 
-    // Sort baud rate list
+        // Sort baud rate list
 #if QT_VERSION >= QT_VERSION_CHECK(5, 12, 0)
     for (auto i = 0; i < m_baudRateList.count() - 1; ++i)
     {
@@ -779,4 +781,3 @@ QVector<QSerialPortInfo> Serial::validPorts() const
     // Return list
     return ports;
 }
-

@@ -29,7 +29,8 @@
 #include <QGridLayout>
 #include <QProgressBar>
 
-namespace Ui {
+namespace Ui
+{
 class MainWindow;
 }
 
@@ -52,8 +53,8 @@ private slots:
     void disconnectSerial();
     void onDeviceIndexChanged(int index);
     void onBaudRateIndexChanged(int index);
-    void onSerialDataSent(const QByteArray& data);
-    void onSerialDataReceived(const QByteArray& data);
+    void onSerialDataSent(const QByteArray &data);
+    void onSerialDataReceived(const QByteArray &data);
 
     void onAxisChanged(const int js, const int axis, const qreal value);
     void onButtonChanged(const int js, const int button, const bool pressed);
@@ -62,11 +63,11 @@ private:
     Ui::MainWindow *m_ui;
     QString m_buffer;
 
-    QVBoxLayout* m_axisLayout;
-    QGridLayout* m_buttonsLayout;
+    QVBoxLayout *m_axisLayout;
+    QGridLayout *m_buttonsLayout;
 
-    QList<QProgressBar*> m_axes;
-    QList<QCheckBox*> m_buttons;
+    QList<QProgressBar *> m_axes;
+    QList<QCheckBox *> m_buttons;
 
     double m_spd1;
     double m_spd2;
@@ -75,4 +76,3 @@ private:
 
     QTimer m_sendTimer;
 };
-
