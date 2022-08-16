@@ -68,6 +68,11 @@ private:
     QList<QProgressBar*> m_axes;
     QList<QCheckBox*> m_buttons;
 
+    double m_spd1;
+    double m_spd2;
+    double m_stp1;
+    double m_stp2;
+
     QTimer m_sendTimer;
 };
 

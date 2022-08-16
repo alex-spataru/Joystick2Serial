@@ -23,6 +23,8 @@
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
 
+#include <QtMath>
+
 #include "Serial.h"
 #include "Utilities.h"
 #include "QJoysticks.h"
@@ -31,6 +33,11 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     m_ui(new Ui::MainWindow)
 {
+    m_spd1 = 0;
+    m_spd2 = 0;
+    m_stp1 = 0;
+    m_stp2 = 0;
+
     m_ui->setupUi(this);
     m_axisLayout = new QVBoxLayout(m_ui->axesContainer);
     m_buttonsLayout = new QGridLayout(m_ui->buttonsContainer);
@@ -60,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_ui->baudRates->setCurrentIndex(Serial::instance().baudRateList().indexOf("115200"));
 
     connect(&m_sendTimer, &QTimer::timeout, this, &MainWindow::sendData);
-    m_sendTimer.start(100);
+    m_sendTimer.start(250);
 }
 
 MainWindow::~MainWindow()
@@ -69,33 +76,19 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::sendData() {
-    QString buffer = "$";
     const int js = m_ui->joystickList->currentIndex();
 
     if (QJoysticks::getInstance()->joystickExists(js)) {
-        const int axes = QJoysticks::getInstance()->getNumAxes(js);
-        const int buttons = QJoysticks::getInstance()->getNumButtons(js);
+        const int spd1 = m_spd1 * 20;
+        const int spd2 = m_spd2 * 20;
+        m_stp2 = fmax(0, m_stp2);
+        m_stp2 = fmin(3200, m_stp2);
+        const auto data = QString("%1,%2,%3,%4\n").arg(QString::number((int) spd1),
+                                                       QString::number((int) spd2),
+                                                       QString::number((int) m_stp1),
+                                                       QString::number((int) m_stp2));
 
-        if (axes <= 0 && buttons <= 0)
-            return;
-
-        for (int i = 0; i < axes; ++i) {
-            auto val = QJoysticks::getInstance()->getAxis(js, i) * 100;
-            buffer.append(QString::number((int) val));
-            buffer.append(",");
-        }
-
-        for (int i = 0; i < buttons; ++i) {
-            auto val = QJoysticks::getInstance()->getButton(js, i);
-            buffer.append(val ? "H" : "L");
-            buffer.append(",");
-        }
-
-        buffer.chop(1);
-        buffer.append("\n");
-
-        if (Serial::instance().isOpen())
-            Serial::instance().write(buffer.toUtf8());
+        Serial::instance().write(data.toUtf8());
     }
 }
 
@@ -200,7 +193,7 @@ void MainWindow::onBaudRateIndexChanged(int index) {
 }
 
 void MainWindow::onSerialDataSent(const QByteArray& data) {
-    m_ui->console->append("<font color='#f88'><strong>TX:</strong> " + QString::fromUtf8(data) + "</font>");
+    //m_ui->console->append("<font color='#f88'><strong>TX:</strong> " + QString::fromUtf8(data) + "</font>");
 }
 
 void MainWindow::onSerialDataReceived(const QByteArray& data) {
@@ -222,14 +215,53 @@ void MainWindow::onSerialDataReceived(const QByteArray& data) {
 
 void MainWindow::onAxisChanged(const int js, const int axis, const qreal value) {
     if (js == m_ui->joystickList->currentIndex()) {
-        if (axis < m_axes.count())
+        if (axis < m_axes.count()) {
             m_axes.at(axis)->setValue(value * 100);
+
+            if (axis == 5)
+                m_spd1 = value;
+            else if (axis == 4)
+                m_spd2 = value;
+        }
     }
 }
 
 void MainWindow::onButtonChanged(const int js, const int button, const bool pressed) {
     if (js == m_ui->joystickList->currentIndex()) {
-        if (button < m_buttons.count())
+        if (button < m_buttons.count()) {
             m_buttons.at(button)->setChecked(pressed);
+
+            if (pressed) {
+                if (button == 1)
+                    m_stp1 = 0;
+                else if (button == 3)
+                    m_stp1 = 90;
+                else if (button == 2)
+                    m_stp1 = 180;
+                else if (button == 0)
+                    m_stp1 = 270;
+
+                else if (button == 13)
+                    m_stp2 += 360;
+                else if (button == 14)
+                    m_stp2 -= 360;
+
+                else if (button == 5) {
+                    m_spd1 = 1;
+                    m_spd2 = 0;
+                } else if (button == 4) {
+                    m_spd1 = 0;
+                    m_spd2 = 1;
+                }
+            } else {
+                if (button == 5) {
+                    m_spd1 = 0;
+                    m_spd2 = 0;
+                } else if (button == 4) {
+                    m_spd1 = 0;
+                    m_spd2 = 0;
+                }
+            }
+        }
     }
 }
